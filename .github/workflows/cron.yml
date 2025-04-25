@@ -1,9 +1,5 @@
 name: Enviar Estoque POD
 
-on:
-  schedule:
-    # todo dia às 19:00 UTC = 15:00 America/Asuncion
-    - cron: '0 19 * * *'
 
 on:
   workflow_dispatch:   # perm ite “Run workflow” manualmente na UI
