@@ -1,9 +1,8 @@
 name: Enviar Estoque POD
 
 on:
-  workflow_dispatch: {}          # permite rodar manualmente se quiser
   schedule:
-    - cron: '30 20 * * *'        # todo dia às 20:30 UTC = 17:30 Brasília
+    - cron: '*/1 * * * *'
 
 jobs:
   build:
