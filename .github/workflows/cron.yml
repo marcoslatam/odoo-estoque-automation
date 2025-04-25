@@ -28,8 +28,3 @@ jobs:
           python imprimir_message_body.py > report.txt
           echo "Arquivo report.txt gerado com $(wc -l report.txt | awk '{print $1}') linhas."
 
-      - name: Fazer upload do relatório
-        uses: actions/upload-artifact@v2
-        with:
-          name: estoque-pod-report
-          path: report.txt
