@@ -1,0 +1,27 @@
+name: Enviar Estoque POD
+
+on:
+  schedule:
+    # todo dia às 06:00 UTC = 08:00 Europe/Amsterdam
+    - cron: '0 6 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install deps
+        run: pip install odoorpc
+
+      - name: Executar relatório
+        env:
+          ODOO_USER: ${{ secrets.ODOO_USER }}
+          ODOO_PASS: ${{ secrets.ODOO_PASS }}
+        run: python imprimir_message_body.py
