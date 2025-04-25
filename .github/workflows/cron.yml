@@ -1,14 +1,13 @@
 name: Enviar Estoque POD
 
 on:
-  workflow_dispatch: {}          # permite rodar manualmente
+  workflow_dispatch: {}
   schedule:
-    - cron: '0 19 * * *'         # todo dia às 19:00 UTC (15:00 Assunção)
+    - cron: '0 19 * * *'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
 
@@ -18,13 +17,14 @@ jobs:
           python-version: '3.9'
 
       - name: Install deps
-        run: pip install odoorpc
+        run: pip install odoorpc twilio
 
-      - name: Executar relatório e salvar em arquivo
+      - name: Enviar relatório via WhatsApp
         env:
           ODOO_USER: ${{ secrets.ODOO_USER }}
           ODOO_PASS: ${{ secrets.ODOO_PASS }}
-        run: |
-          python imprimir_message_body.py > report.txt
-          echo "Arquivo report.txt gerado com $(wc -l report.txt | awk '{print $1}') linhas."
-
+          TWILIO_SID: ${{ secrets.TWILIO_SID }}
+          TWILIO_TOKEN: ${{ secrets.TWILIO_TOKEN }}
+          TWILIO_FROM: ${{ secrets.TWILIO_FROM }}
+          TWILIO_TO: ${{ secrets.TWILIO_TO }}
+        run: python enviar_estoque_whatsapp.py
