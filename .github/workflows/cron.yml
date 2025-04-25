@@ -3,7 +3,7 @@ name: Enviar Estoque POD
 on:
   workflow_dispatch: {}          # permite rodar manualmente se quiser
   schedule:
-    - cron: '58 19 * * *'        # todo dia às 19:58 UTC (15:58 Assunção)
+    - cron: '15 20 * * *'        # todo dia às 20:15 UTC = 17:15 Brasília
 
 jobs:
   build:
@@ -22,10 +22,10 @@ jobs:
 
       - name: Enviar relatório via WhatsApp
         env:
-          ODOO_USER: ${{ secrets.ODOO_USER }}
-          ODOO_PASS: ${{ secrets.ODOO_PASS }}
-          TWILIO_SID: ${{ secrets.TWILIO_SID }}
+          ODOO_USER:   ${{ secrets.ODOO_USER }}
+          ODOO_PASS:   ${{ secrets.ODOO_PASS }}
+          TWILIO_SID:  ${{ secrets.TWILIO_SID }}
           TWILIO_TOKEN: ${{ secrets.TWILIO_TOKEN }}
           TWILIO_FROM: ${{ secrets.TWILIO_FROM }}
-          TWILIO_TO: ${{ secrets.TWILIO_TO }}
+          TWILIO_TO:   ${{ secrets.TWILIO_TO }}
         run: python enviar_estoque_whatsapp.py
