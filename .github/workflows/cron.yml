@@ -8,7 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
 
@@ -20,8 +19,14 @@ jobs:
       - name: Install deps
         run: pip install odoorpc
 
-      - name: Executar relatório
+      - name: Executar relatório e salvar em arquivo
         env:
           ODOO_USER: ${{ secrets.ODOO_USER }}
           ODOO_PASS: ${{ secrets.ODOO_PASS }}
-        run: python imprimir_message_body.py
+        run: python imprimir_message_body.py > report.txt
+
+      - name: Fazer upload do relatório
+        uses: actions/upload-artifact@v3
+        with:
+          name: estoque-pod-report
+          path: report.txt
