@@ -1,9 +1,9 @@
 name: Enviar Estoque POD
 
 on:
-  workflow_dispatch: {}       # permite “Run workflow” manualmente
+  workflow_dispatch: {}          # permite rodar manualmente pelo botão “Run workflow”
   schedule:
-    - cron: '0 19 * * *'      # todo dia às 19:00 UTC (15:00 Assunção)
+    - cron: '0 19 * * *'         # todo dia às 19:00 UTC (15:00 Assunção)
 
 jobs:
   build:
