@@ -1,9 +1,9 @@
 name: Enviar Estoque POD
 
 on:
-  workflow_dispatch: {}       # dispara manualmentev
+  workflow_dispatch: {}         # dispara manualmente (opcional)
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '*/5 * * * *'       # TESTE: a cada 5 minutos
 
 jobs:
   build:
