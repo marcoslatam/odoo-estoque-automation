@@ -1,13 +1,14 @@
 name: Enviar Estoque POD
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch: {}          # permite rodar manualmente se quiser
   schedule:
-    - cron: '0 19 * * *'
+    - cron: '58 19 * * *'        # todo dia às 19:58 UTC (15:58 Assunção)
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
 
