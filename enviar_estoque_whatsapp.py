@@ -1,7 +1,9 @@
 import os
 import odoorpc
-from twilio.rest import Client
 from datetime import datetime
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from twilio.rest import Client
 
 # ============================
 # 1) Configurações via Secrets
@@ -22,7 +24,6 @@ TO_WHATS    = os.environ['TWILIO_TO']    # ex: 'whatsapp:+55SEUNUMERO'
 odoo = odoorpc.ODOO(ODOO_HOST, port=443, protocol='jsonrpc+ssl')
 odoo.login(ODOO_DB, ODOO_USER, ODOO_PASS)
 
-# pega o ID da categoria “PRODUCTO TERMINADO”
 cat = odoo.env['product.category'].search_read(
     [('name', '=', 'PRODUCTO TERMINADO')], ['id'], limit=1
 )
@@ -30,7 +31,6 @@ if not cat:
     raise SystemExit('Categoria "PRODUCTO TERMINADO" não encontrada.')
 cat_id = cat[0]['id']
 
-# busca quants internos com qty>0 e nome começando com POD
 records = odoo.env['stock.quant'].search_read([
     ('location_id.usage', '=', 'internal'),
     ('quantity', '>', 0),
@@ -38,42 +38,58 @@ records = odoo.env['stock.quant'].search_read([
     ('product_id.name', 'ilike', 'POD%'),
 ], ['product_id', 'quantity'])
 
-# agrega quantidades por nome
 estoque = {}
 for r in records:
     _, nome = r['product_id']
     estoque[nome] = estoque.get(nome, 0) + int(r['quantity'])
 
-# monta a data
+# data para o relatório
 hoje = datetime.now().strftime("%d/%m/%Y")
 
 # ============================
-# 3) Disparo único com anexo CSV via Gist
+# 3) Gerar PDF localmente
 # ============================
+pdf_path = 'report.pdf'
+c = canvas.Canvas(pdf_path, pagesize=letter)
+width, height = letter
+y = height - 40
 
-# URL raw do seu CSV hospedado no Gist
+c.setFont('Helvetica-Bold', 14)
+c.drawString(40, y, f"Relatório de Estoque POD — {hoje}")
+y -= 30
+
+c.setFont('Helvetica', 12)
+if not estoque:
+    c.drawString(40, y, "Nenhum produto 'POD' com estoque disponível.")
+else:
+    for nome in sorted(estoque):
+        line = f"- {nome}: {estoque[nome]}"
+        c.drawString(40, y, line)
+        y -= 18
+        if y < 50:            # nova página
+            c.showPage()
+            y = height - 40
+            c.setFont('Helvetica', 12)
+
+c.save()
+print(f"✅ PDF gerado em {pdf_path}")
+
+# ============================
+# 4) Enviar PDF via WhatsApp
+# ============================
+# substitua abaixo pelo link RAW do seu PDF hospedado (Gist ou Pages)
 file_url = (
     'https://gist.githubusercontent.com/marcoslatam/'
     '5ca5f12bcc14dc282c9faedd20221922/raw/'
-    '90251728df93a4c4d23fc60dad113c1fbfac216d/report.csv'
+    '90251728df93a4c4d23fc60dad113c1fbfac216d/report.pdf'
 )
 
-# Corpo da mensagem (texto curto)
-if not estoque:
-    body = (
-        f"*Produtos em estoque (POD)*\n"
-        f"_Data: {hoje}_\n\n"
-        "Nenhum produto 'POD' com estoque disponível.\n"
-        "Veja o CSV em anexo."
-    )
-else:
-    body = (
-        f"*Produtos em estoque (POD)*\n"
-        f"_Data: {hoje}_\n\n"
-        "Segue em anexo o CSV completo com todos os itens."
-    )
+body = (
+    f"*Produtos em estoque (POD)*\n"
+    f"_Data: {hoje}_\n\n"
+    "Segue em anexo o PDF completo com todos os itens."
+)
 
-# cria cliente Twilio e dispara
 client = Client(ACCOUNT_SID, AUTH_TOKEN)
 msg = client.messages.create(
     body=body,
